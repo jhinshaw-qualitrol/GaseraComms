@@ -279,6 +279,16 @@ namespace GaseraComms
 
             // clear existing chart series
             chart1.Series.Clear();
+            // set up chart1 axes
+            chart1.ChartAreas[0].AxisY.Title = "ppm";
+            chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:F0,}";
+            // chart1.ChartAreas[0].AxisX.LabelStyle.Format = "";
+           
+            // create a contextmenu to handle right-click on the chart
+            // for show/hide the series
+            ContextMenu cM = new ContextMenu();
+            chart1.ContextMenu = cM;
+            
             // have to set zero y-axis values to something small, 
             // like 0.01, to use log scaling. Do this when adding rows
             // as the data is uploaded from the monitor
@@ -296,7 +306,12 @@ namespace GaseraComms
                 chart1.Series[gSeries].MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
                 chart1.Series[gSeries].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
                 chart1.Series[gSeries].ToolTip = "#SERIESNAME: #VALY ppm, #VALX";
+                // add a menuitem to the contextmenu
+                cM.MenuItems.Add(gas.ToString(), new EventHandler(cM_MouseDown));
             }
+            // add an ALL context menu item to enable all chart series
+                cM.MenuItems.Add("All", new EventHandler(cM_MouseDown));
+
             // set primary key
             gasDt.PrimaryKey = new DataColumn[] { gasDt.Columns["DateStamp"] };
             // fire event when datatable updates with a new row
@@ -346,6 +361,23 @@ namespace GaseraComms
 
 
         }
+
+        private void cM_MouseDown(object sender, EventArgs e)
+        {
+            MenuItem mI = (MenuItem)sender;
+            if (mI.Text != "All")
+            {
+                // use the menuitem text to toggle visibility
+                chart1.Series[mI.Text].Enabled = !chart1.Series[mI.Text].Enabled;
+            }
+            else
+            {
+                // enable all gas items in the chart
+                for (Gases gas = Gases.CH4; gas < Gases.Water_Offset; gas++)
+                    chart1.Series[gas.ToString()].Enabled = true;
+            }
+        }
+
         /// <summary>
         ///  Generate the command strings for each 
         ///  Gasera command
@@ -655,6 +687,8 @@ namespace GaseraComms
                                         // do the time conversion 
                                         tStamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                                         tStamp = tStamp.AddSeconds(epochSeconds);
+                                        // convert to local time
+                                        tStamp = tStamp.ToLocalTime();
                                         // is this time already accounted for?
                                         if (gasDt.Rows.Find(tStamp) == null)
                                         {
