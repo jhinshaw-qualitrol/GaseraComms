@@ -12,7 +12,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO;
 using System.Globalization;
-
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace GaseraComms
 {
@@ -122,7 +122,7 @@ namespace GaseraComms
             internal bool commsUp;
             internal bool measuring;
             internal string Status;
-            internal string DevErrors;
+            internal string[] DevErrors;
             // dict of task number and task name
             internal Dictionary<string, string> TaskList;
             internal bool taskListUpdated;
@@ -143,9 +143,8 @@ namespace GaseraComms
                 eP = null;
                 taskListUpdated = false;
                 TaskList = new Dictionary<string, string>();
-                DevErrors = "Not Connected";
+                DevErrors = new string[] { "None" };
                 measuring = false;
-                DevErrors = "Not Connected";
                 respStr = new string[0];
                 selectedTask = string.Empty ;
                 enableMeasure = false;
@@ -281,7 +280,7 @@ namespace GaseraComms
             chart1.Series.Clear();
             // set up chart1 axes
             chart1.ChartAreas[0].AxisY.Title = "ppm";
-            chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:F0,}";
+            chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:G5}";
             // chart1.ChartAreas[0].AxisX.LabelStyle.Format = "";
            
             // create a contextmenu to handle right-click on the chart
@@ -302,15 +301,24 @@ namespace GaseraComms
                 chart1.Series.Add(gas.ToString());
                 chart1.Series[gSeries].XValueMember = "DateStamp";
                 chart1.Series[gSeries].YValueMembers= gas.ToString();
-                chart1.Series[gSeries].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-                chart1.Series[gSeries].MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-                chart1.Series[gSeries].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
+                chart1.Series[gSeries].ChartType = SeriesChartType.Line;
+                chart1.Series[gSeries].MarkerStyle = MarkerStyle.Circle;
+                chart1.Series[gSeries].XValueType = ChartValueType.Time;
                 chart1.Series[gSeries].ToolTip = "#SERIESNAME: #VALY ppm, #VALX";
                 // add a menuitem to the contextmenu
                 cM.MenuItems.Add(gas.ToString(), new EventHandler(cM_MouseDown));
             }
             // add an ALL context menu item to enable all chart series
-                cM.MenuItems.Add("All", new EventHandler(cM_MouseDown));
+            cM.MenuItems.Add("All", new EventHandler(cM_MouseDown));
+            // add a separator and a "Copy" menuitem
+            cM.MenuItems.Add( "-");
+            cM.MenuItems.Add("Copy", new EventHandler(cM_Copy));
+            // default color of yellow for "H2O" [6th] series is nearly invsible
+            chart1.Series["H2O"].Color = Color.DarkOliveGreen;
+            // set a background color for the chart area
+            // chart1.ChartAreas[0].BackColor = Color.FromArgb(64, Color.Ivory);
+
+            // chart1.save
 
             // set primary key
             gasDt.PrimaryKey = new DataColumn[] { gasDt.Columns["DateStamp"] };
@@ -359,7 +367,24 @@ namespace GaseraComms
             gaseraMStatus.Add("2", "Sample integration");
             gaseraMStatus.Add("3", "Sample analysis");
 
+            // tab and other format settings for error display
+            errorRichTextBox.SelectionTabs = new int[] { 15 };
+            gasConcRichTextBox.SelectionTabs = new int[] { 15 };
 
+        }
+        /// <summary>
+        /// Copy chart image to clipboard as png
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cM_Copy(object sender, EventArgs e)
+        {
+            using (MemoryStream mS = new MemoryStream())
+            {
+                chart1.SaveImage(mS, ChartImageFormat.Png);
+                Bitmap bm = new Bitmap(mS);
+                Clipboard.SetImage(bm);
+            }
         }
 
         private void cM_MouseDown(object sender, EventArgs e)
@@ -372,7 +397,7 @@ namespace GaseraComms
             }
             else
             {
-                // enable all gas items in the chart
+                // to enable all gas items in the chart
                 for (Gases gas = Gases.CH4; gas < Gases.Water_Offset; gas++)
                     chart1.Series[gas.ToString()].Enabled = true;
             }
@@ -479,31 +504,34 @@ namespace GaseraComms
         {
             if (cState.commsUp && !cState.measuring)
             {
-                // selected task is set on the
-                // taskCombobox_SelectionChanged event
-                // here, regenerate and update 
-                // the start measure command
-                // with the selected task value:
-                // add the task number followed by a space
                 int idx;
+                cState.enableMeasure = false;
                 if (cState.selectedTask.Length > 0)
                 {
-                    idx = (int) gaseraCmds.STAM;
-                    GenGaseraCmd(gaseraCmds.STAM, out reqCmds[idx]);
-                    int byteCount = reqCmds[idx][MAXCMDBYTECOUNT - 1] - 1;
-                    char[] taskChr = cState.selectedTask.ToCharArray();
-                    for (int i = 0; i < cState.selectedTask.Length; i++)
+                    // confirm the task to be run
+                    // get the name of the task from the listbox
+                    KeyValuePair<string, string> kvp = (KeyValuePair<string, string>) taskComboBox.SelectedItem;
+                    if (MessageBox.Show(string.Format("Start task {0} : {1}?", kvp.Key, kvp.Value), "Starting measurement", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
-                        reqCmds[idx][byteCount] = (byte)taskChr[i];
-                        byteCount++;
+                        // here, regenerate and update 
+                        // the start measure command
+                        // with the selected task value:
+                        // add the task number followed by a space
+                        idx = (int)gaseraCmds.STAM;
+                        GenGaseraCmd(gaseraCmds.STAM, out reqCmds[idx]);
+                        int byteCount = reqCmds[idx][MAXCMDBYTECOUNT - 1] - 1;
+                        char[] taskChr = cState.selectedTask.ToCharArray();
+                        for (int i = 0; i < cState.selectedTask.Length; i++)
+                        {
+                            reqCmds[idx][byteCount] = (byte)taskChr[i];
+                            byteCount++;
+                        }
+                        reqCmds[idx][byteCount] = SPC;
+                        reqCmds[idx][byteCount + 1] = ETX;
+                        reqCmds[idx][MAXCMDBYTECOUNT - 1] = (byte)(byteCount + 2);
+                        cState.enableMeasure = true;
                     }
-                    reqCmds[idx][byteCount] = SPC;
-                    reqCmds[idx][byteCount + 1] = ETX;
-                    reqCmds[idx][MAXCMDBYTECOUNT - 1] = (byte) (byteCount + 2);
-                    cState.enableMeasure = true;
                 }
-                else
-                    cState.enableMeasure = false;
             }
         }
 
@@ -515,6 +543,7 @@ namespace GaseraComms
         private void stopMeasurementButton_Click(object sender, EventArgs e)
         {
             if (cState.commsUp)
+
                 cState.enableMeasure  = false;
         }
         /// <summary>
@@ -579,25 +608,21 @@ namespace GaseraComms
                         SendReceive(clientSocket, reqCmds[(int)gaseraCmds.AMST], out cState.respStr);
                         cState.MeasPhase = cState.respStr[2];
                         
-
                         // Device Error command
                         SendReceive(clientSocket, reqCmds[(int)gaseraCmds.AERR], out cState.respStr);
-                        // catenate to the end of the response
-                        // its not clear if these are supposed to be 
-                        // delimited by spaces in the response or not
-                        // zero element of respStr is echo-back of the command
-                        // first element is the response error code,
-                        // which is handled in SendReceive()
-                        int i = 2;
-                        StringBuilder strB = new StringBuilder();
-                        while (i < cState.respStr.Length)
+                        cState.haveErrors = false;
+                        // error response is like this:
+                        // AERR 0 <error code>
+                        // where <error code> = "8001" for example
+                        if (cState.respStr.Length > 2)
                         {
-                            strB.Append(cState.respStr[i]);
-                            i++;
+                            cState.DevErrors = new string[cState.respStr.Length - 2];
+                            cState.haveErrors = true;
+                            for (int i = 2; i < cState.respStr.Length; i++)
+                            {
+                                cState.DevErrors[i - 2] = cState.respStr[i];
+                            }
                         }
-                        cState.DevErrors = strB.ToString();
-                        cState.haveErrors = strB.Length > 0 ? true : false;
-
 
                         // Device tasklist command
                         if (!cState.measuring)
@@ -613,7 +638,7 @@ namespace GaseraComms
                             // NOTE The code below will fail if a taskname contains a space!
                             DictComparer dComp = new DictComparer();
                             Dictionary<string, string> locTaskList = new Dictionary<string, string>();
-                            i = 2;
+                            int i = 2;
                             while (i < cState.respStr.Length - 1)
                             {
                                 int j;
@@ -633,7 +658,11 @@ namespace GaseraComms
                                 }
                                 i += 2;
                             }
-
+                            // reverse sort the new dict
+                            // to present the default task last
+                            // the order of elements does not affect
+                            // the .Equals comparison below
+                            locTaskList = locTaskList.OrderByDescending(kpv => kpv.Key).ToDictionary(kpv => kpv.Key, kpv => kpv.Value);
                             // if the new dict contains something, 
                             // and the contents != existing dict contents
                             // then update cState.TaskList with new
@@ -726,11 +755,11 @@ namespace GaseraComms
                                                 // with the concentrations
 
                                                 // format date for excel, going into the log file
-                                                // dT should already be in UTC, but we'll convert it anyway...
+                                               
                                                 // use an ISO-8601-like format that Excel can understand natively, i.e.
                                                 // YYYY-MM-DD hh:mm:ss.s
                                                 // have to leave out the T and the timezone from ISO-8601: YYYY-MM-DDThh:mm:ss.sTZD
-                                                logStr.AppendFormat("{0}", TimeZoneInfo.ConvertTime(tStamp, TimeZoneInfo.Utc).ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss'.'f", CultureInfo.InvariantCulture));
+                                                logStr.AppendFormat("{0}", tStamp.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss", CultureInfo.InvariantCulture));
                                                 for (int k = 1; k < gasDt.Columns.Count; k ++)
                                                 {
                                                     logStr.AppendFormat("\t{0}", (double)dR[k]);
@@ -762,18 +791,18 @@ namespace GaseraComms
 
                         else if (cState.haveErrors )
                         {
-                            // assess stop measuring due to error (from up in the UI)
-                            // stop measuring only if the error is Critical or Blocking, not Warning
-                            // TODO need a string[] for the errors so can catch more than one at a time
-                            string errStr;
-                            if (gaseraErrors.TryGetValue(cState.DevErrors, out errStr))
-                            {
-                                if (!errStr.ToUpper().Contains("WARNING"))
-                                {
-                                    SendReceive(clientSocket, reqCmds[(int)gaseraCmds.STPM], out cState.respStr);
-                                    cState.measuring = false;
-                                }
-                            }
+                            //// commented out for now, don't quite know if this is necessary
+                            //// could stop measuring due to error 
+                            //// stop measuring only if the error is Critical or Blocking, not Warning
+                            //string errStr;
+                            //if (gaseraErrors.TryGetValue(cState.DevErrors[0], out errStr))
+                            //{
+                            //    if (!errStr.ToUpper().Contains("WARNING"))
+                            //    {
+                            //        SendReceive(clientSocket, reqCmds[(int)gaseraCmds.STPM], out cState.respStr);
+                            //        cState.measuring = false;
+                            //    }
+                            //}
                         }
 
                         // send progress update
@@ -804,7 +833,8 @@ namespace GaseraComms
                 cState.commsUp = false;
                 cState.measuring = false;
                 cState.enableMeasure = false;
-                cState.DevErrors = "Not Connected";
+                cState.haveErrors = false;
+                cState.DevErrors = new string[] { "None" };
                 cState.Status = "Not Connected";
                 e.Result = cState;
                 bgW.ReportProgress(100, cState);
@@ -850,20 +880,33 @@ namespace GaseraComms
         private void commsBGWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             string statusValue = string.Empty;
+            string errText = "None";
+            string errStr = "None";
+            string gasConc = string.Empty;
+            StringBuilder sB = new StringBuilder();
             if (cState.commsUp)
             {
                 startStopCommsButton.Text = "Stop Communications";
-                startMeasurementButton.Enabled = true;
+
                 IPEndPoint ipEp = (IPEndPoint)cState.eP;
                 commStatusToolStripLabel.Text = (string.Format("Connected to {0}:{1}", IPAddress.Parse (ipEp.Address.ToString()), ipEp.Port));
 
-                // update the toolstrip status labels
-                // The device error status might be more than one error
-                // might expand the error display to multiple lines in a control instead of the statusLabel
-                string errStr = "None";
+                // update the toolstrip error and errorRichTextBox contents
                 if (cState.haveErrors)
-                    errStr = cState.DevErrors;
+                {
+                    errStr = "Error";
+                    // display the error codes and strings in richTextBox
+                    foreach (string errCode in cState.DevErrors)
+                    {
+                        if (gaseraErrors.TryGetValue(errCode, out errText))
+                        {
+                            sB.AppendFormat("{0}\t{1}\n", errCode, errText);
+                        }
+                    }
+                    errText = sB.ToString();
+                }
                 deviceErrorToolStipStatusLabel.Text = (string.Format("Device Errors: {0}", errStr));
+                errorRichTextBox.Text = errText;
 
                 // update the device status displayed
                 if (! gaseraDStatus.TryGetValue( cState.Status, out statusValue ))
@@ -951,11 +994,25 @@ namespace GaseraComms
                     //    else
                     //        MessageBox.Show("Unable to parse epoch time {0}", cState.measStr[i]);
                     //}
-                    // display the information on the UI
-                    // a text box, a graph, or a datatview linked to the data table?
+                    // update display of current concentrations
+                    // can assume that the gasDt table is already sorted
+                    // by DateStamp (primary key) column
+                    // get the last row in the table
+                    DataRow dR = gasDt.Rows[gasDt.Rows.Count - 1];
+                    // first line is timestamp
+                    sB = new StringBuilder();
+                    DateTime tStamp = (DateTime)dR["DateStamp"];
+                    sB.AppendFormat("{0}\n\n", tStamp.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss", CultureInfo.InvariantCulture));
+                    // iterate thru each column in gas-order
+                    // and add to the currConcRichTextBox
+                    for (Gases gas = Gases.CH4; gas < Gases.Water_Offset; gas++)
+                    {
+                        sB.AppendFormat("{0}\t{1:G5}\n", gas.ToString(), (double) dR[gas.ToString()]);
+                    }
+
+                    gasConcRichTextBox.Text = sB.ToString();
 
                     // update the chart
-                   
                     chart1.DataBind();
 
                     // update the UI to show some action
@@ -982,13 +1039,6 @@ namespace GaseraComms
 
                 }
 
-                // put last response onto form for debug
-                // will be the measure result when measuring, 
-                // or the tasklist if not measuring
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i <  cState.respStr.Length; i++)
-                    sb.Append(cState.respStr[i]);
-                respLabel.Text = sb.ToString();
             }
             //else
             //{
@@ -1070,6 +1120,7 @@ namespace GaseraComms
                 cState.canOpenFile = false;
                 // change button label accordingly
                 tsB.Text = "Open File...";
+                fileNameToolStripStatusLabel.Text = "";
             }
             else
             {
@@ -1082,6 +1133,8 @@ namespace GaseraComms
                 mDlg.AddExtension = true;
                 mDlg.CheckPathExists = true;
                 mDlg.CheckFileExists = false;
+                mDlg.CreatePrompt = false;
+                mDlg.OverwritePrompt = false;
                 mDlg.RestoreDirectory = true;
                 if(mDlg.ShowDialog() == DialogResult.OK)
                 {
@@ -1118,7 +1171,17 @@ namespace GaseraComms
                     }
                     finally
                     {
-                        tsB.Text = cState.canOpenFile ? "Close File" : "Open File ...";
+                        if (cState.canOpenFile)
+                        {
+                            tsB.Text = "Close File";
+                            fileNameToolStripStatusLabel.Text = cState.fileName ;
+                        }
+                        else
+                        {
+                            tsB.Text =  "Open File ...";
+                            fileNameToolStripStatusLabel.Text = "";
+                        }
+
                     }
                 }
             }

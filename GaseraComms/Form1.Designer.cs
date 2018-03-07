@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.deviceStatusToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -45,29 +45,38 @@
             this.fileAppendRadioButton = new System.Windows.Forms.RadioButton();
             this.label2 = new System.Windows.Forms.Label();
             this.taskComboBox = new System.Windows.Forms.ComboBox();
-            this.respLabel = new System.Windows.Forms.Label();
             this.ipTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.startStopCommsButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.fileOpenButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.startStopCommsButton = new System.Windows.Forms.ToolStripButton();
             this.startMeasurementButton = new System.Windows.Forms.ToolStripButton();
             this.stopMeasurementButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitButton = new System.Windows.Forms.ToolStripButton();
             this.commsBGWorker = new System.ComponentModel.BackgroundWorker();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.errorRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
+            this.fileNameToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.gasConcRichTextBox = new System.Windows.Forms.RichTextBox();
             this.statusStrip1.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
+            this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
+            this.groupBox2.SuspendLayout();
+            this.statusStrip2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -80,7 +89,7 @@
             this.measureProgressBar});
             this.statusStrip1.Location = new System.Drawing.Point(0, 0);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(807, 24);
+            this.statusStrip1.Size = new System.Drawing.Size(949, 24);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -118,14 +127,15 @@
             // 
             // toolStripContainer1.ContentPanel
             // 
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.groupBox3);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.groupBox2);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.chart1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.groupBox1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label2);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.taskComboBox);
-            this.toolStripContainer1.ContentPanel.Controls.Add(this.respLabel);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.ipTextBox);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(676, 476);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(818, 479);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -133,23 +143,27 @@
             this.toolStripContainer1.LeftToolStripPanel.Controls.Add(this.toolStrip1);
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(807, 525);
+            this.toolStripContainer1.Size = new System.Drawing.Size(949, 525);
             this.toolStripContainer1.TabIndex = 2;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
+            // toolStripContainer1.TopToolStripPanel
+            // 
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.statusStrip2);
+            // 
             // chart1
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(56, 165);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
+            this.chart1.Location = new System.Drawing.Point(249, 164);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(591, 292);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart1.Series.Add(series2);
+            this.chart1.Size = new System.Drawing.Size(531, 292);
             this.chart1.TabIndex = 6;
             this.chart1.Text = "chart1";
             // 
@@ -206,15 +220,6 @@
             this.taskComboBox.TabIndex = 3;
             this.taskComboBox.SelectedIndexChanged += new System.EventHandler(this.taskComboBox_SelectedIndexChanged);
             // 
-            // respLabel
-            // 
-            this.respLabel.AutoSize = true;
-            this.respLabel.Location = new System.Drawing.Point(357, 33);
-            this.respLabel.Name = "respLabel";
-            this.respLabel.Size = new System.Drawing.Size(39, 13);
-            this.respLabel.TabIndex = 2;
-            this.respLabel.Text = "Debug";
-            // 
             // ipTextBox
             // 
             this.ipTextBox.Location = new System.Drawing.Point(106, 83);
@@ -246,8 +251,23 @@
             this.quitButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 3);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(131, 158);
+            this.toolStrip1.Size = new System.Drawing.Size(131, 139);
             this.toolStrip1.TabIndex = 0;
+            // 
+            // startStopCommsButton
+            // 
+            this.startStopCommsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.startStopCommsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.startStopCommsButton.Name = "startStopCommsButton";
+            this.startStopCommsButton.Size = new System.Drawing.Size(129, 19);
+            this.startStopCommsButton.Text = "Start Communications";
+            this.startStopCommsButton.ToolTipText = "Start or Stop Ethernet Communications";
+            this.startStopCommsButton.Click += new System.EventHandler(this.startStopCommsButton_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(129, 6);
             // 
             // fileOpenButton
             // 
@@ -263,16 +283,6 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(129, 6);
-            // 
-            // startStopCommsButton
-            // 
-            this.startStopCommsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.startStopCommsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.startStopCommsButton.Name = "startStopCommsButton";
-            this.startStopCommsButton.Size = new System.Drawing.Size(129, 19);
-            this.startStopCommsButton.Text = "Start Communications";
-            this.startStopCommsButton.ToolTipText = "Start or Stop Ethernet Communications";
-            this.startStopCommsButton.Click += new System.EventHandler(this.startStopCommsButton_Click);
             // 
             // startMeasurementButton
             // 
@@ -325,16 +335,68 @@
             // 
             this.errorProvider1.ContainerControl = this;
             // 
-            // toolStripSeparator3
+            // errorRichTextBox
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(129, 6);
+            this.errorRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.errorRichTextBox.Location = new System.Drawing.Point(3, 16);
+            this.errorRichTextBox.Name = "errorRichTextBox";
+            this.errorRichTextBox.ReadOnly = true;
+            this.errorRichTextBox.Size = new System.Drawing.Size(494, 67);
+            this.errorRichTextBox.TabIndex = 7;
+            this.errorRichTextBox.TabStop = false;
+            this.errorRichTextBox.Text = "";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.errorRichTextBox);
+            this.groupBox2.Location = new System.Drawing.Point(249, 17);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(500, 86);
+            this.groupBox2.TabIndex = 8;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Active Errors";
+            // 
+            // statusStrip2
+            // 
+            this.statusStrip2.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileNameToolStripStatusLabel});
+            this.statusStrip2.Location = new System.Drawing.Point(0, 0);
+            this.statusStrip2.Name = "statusStrip2";
+            this.statusStrip2.Size = new System.Drawing.Size(949, 22);
+            this.statusStrip2.TabIndex = 0;
+            // 
+            // fileNameToolStripStatusLabel
+            // 
+            this.fileNameToolStripStatusLabel.Name = "fileNameToolStripStatusLabel";
+            this.fileNameToolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.gasConcRichTextBox);
+            this.groupBox3.Location = new System.Drawing.Point(21, 178);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(209, 222);
+            this.groupBox3.TabIndex = 9;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Current Gas Concentrations";
+            // 
+            // gasConcRichTextBox
+            // 
+            this.gasConcRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gasConcRichTextBox.Location = new System.Drawing.Point(3, 16);
+            this.gasConcRichTextBox.Name = "gasConcRichTextBox";
+            this.gasConcRichTextBox.ReadOnly = true;
+            this.gasConcRichTextBox.Size = new System.Drawing.Size(203, 203);
+            this.gasConcRichTextBox.TabIndex = 7;
+            this.gasConcRichTextBox.TabStop = false;
+            this.gasConcRichTextBox.Text = "";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(807, 525);
+            this.ClientSize = new System.Drawing.Size(949, 525);
             this.Controls.Add(this.toolStripContainer1);
             this.Name = "Form1";
             this.Text = "Gasera One Communications";
@@ -347,6 +409,8 @@
             this.toolStripContainer1.ContentPanel.PerformLayout();
             this.toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.LeftToolStripPanel.PerformLayout();
+            this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer1.TopToolStripPanel.PerformLayout();
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
@@ -355,6 +419,10 @@
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
+            this.groupBox2.ResumeLayout(false);
+            this.statusStrip2.ResumeLayout(false);
+            this.statusStrip2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -375,7 +443,6 @@
         private System.Windows.Forms.TextBox ipTextBox;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.ToolStripStatusLabel commStatusToolStripLabel;
-        private System.Windows.Forms.Label respLabel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox taskComboBox;
         private System.Windows.Forms.ToolStripProgressBar measureProgressBar;
@@ -386,6 +453,12 @@
         private System.Windows.Forms.RadioButton fileAppendRadioButton;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.GroupBox groupBox2;
+        internal System.Windows.Forms.RichTextBox errorRichTextBox;
+        private System.Windows.Forms.StatusStrip statusStrip2;
+        private System.Windows.Forms.ToolStripStatusLabel fileNameToolStripStatusLabel;
+        private System.Windows.Forms.GroupBox groupBox3;
+        internal System.Windows.Forms.RichTextBox gasConcRichTextBox;
     }
 }
 
