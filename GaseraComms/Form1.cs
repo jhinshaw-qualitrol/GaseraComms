@@ -18,62 +18,6 @@ namespace GaseraComms
 {
     public partial class Form1 : Form
     {
-        /* NOTES
-         * comms in b/g with timeout
-         * 
-         * UI Functionality
-         *  Start New Measurement
-         *      OnClick
-         *  Stop Current Measurement
-         *      OnClick
-         *      STPM command
-         *  Poll Measurement Results (concentrations)
-         *      OnClick
-         *      Accumulate to tab-delimited file
-         *      ACON command
-         *  Set / update IP address
-         *  Set / update logfile path
-         *  Display Device Status
-         *  Display Error Status
-         *  Display Task List
-         *  
-         * Internal
-         * Start New Measurement
-         *          STAM command
-         * Read measurement results
-         *      OnTimer2, configurable interval
-         *      ACON command
-         * Get Device Status
-         *      OnTimer1, 1 second
-         *      ASTS command
-         * Get Active Errors
-         *      OnTimer1, 1 second
-         *      AERR command
-         * Get Task List
-         *      OnTimer1, 1 second
-         *      ATSK command
-         * Parse IP address
-         * Parse logfile path
-         * Logfile append / overwrite flag
-         * Open Socket
-         * Close Socket
-         * Open Logfile
-         * Write to logfile
-         * Close logfile
-         *  
-         * Controls
-         *  Start/Stop Communications button
-         *  Start Measurement, button
-         *  Stop Measurement, another button
-         *  Quit Program button
-         *  Logfile path
-         *  IP Address and socket (default socket = 8888)
-         *   
-         * 
-         * 
-         * 
-        */
-        
         internal IPAddress gIP;
         internal commState cState;
         // datatable to accumulate results from the monitor
@@ -182,9 +126,9 @@ namespace GaseraComms
         internal enum CasGases
         {
             CAS74_82_8 = 1, // CH4
-            CAS74_84_0,     // C2H2
+            CAS74_86_2,     // C2H2
             CAS74_85_1,     // C2H4
-            CAS74_86_2,     // C2H6
+            CAS74_84_0,     // C2H6
             CAS630_08_0,    // CO
             CAS124_38_9,    // CO2
             CAS7732_18_5    // H2O
@@ -709,8 +653,8 @@ namespace GaseraComms
 
                                 // using the first timestamp (at i = 2) and
                                 // assuming the rest of the timestamps
-                                // in the response are the same (as documneted by Gasera)
-                                // check that there's something here and try to parse the CAS number
+                                // in the response are the same (as documented by Gasera)
+                                // check that there's something here and try to parse the CAS numbers
                                 if (measStr.Length > 4)
                                 {
                                     if (long.TryParse(measStr[j], out epochSeconds))
@@ -1144,11 +1088,14 @@ namespace GaseraComms
                 if(mDlg.ShowDialog() == DialogResult.OK)
                 {
                     // file is opened, written, and closed 
-                    // on-demand on GasDt_TableNewRow()
-                    // calling writeLogFile()
+                    // in the background task.
+                    // Calling writeLogFile()
                     // below sets up the transactions
                     // and initializes the file
-                    // cState.canOpenFile already is false;
+                    // cState.canOpenFile should be false upon entering here
+                    // TODO If there are already records in the gasDT, 
+                    // see if they exist in the file (by DateStamp value)
+                    // If not, ask user and maybe write them 
                     cState.fileName = mDlg.FileName;
                     try
                     {
@@ -1193,7 +1140,7 @@ namespace GaseraComms
         }
         /// <summary>
         /// Append the passed string to the file, waiting for
-        /// the operation to complete
+        /// the operation to complete, synchronously
         /// if the string == string.empty then only open/close
         /// but nothing is written
         /// </summary>
@@ -1206,7 +1153,7 @@ namespace GaseraComms
             {
                 if (strToWrite.Length > 0)
                 {
-                    sW.WriteAsync(strToWrite );
+                    sW.Write(strToWrite );
                 }
                 sW.Close();
             }
