@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Serveron")]
-[assembly: AssemblyProduct("GaseraComms")]
+[assembly: AssemblyProduct("Gasera One Communications")]
 [assembly: AssemblyCopyright("Copyright © Qualitrol Corporation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

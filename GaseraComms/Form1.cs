@@ -253,6 +253,8 @@ namespace GaseraComms
  
         private void Form1_Load(object sender, EventArgs e)
         {
+            // display the title and version number in the form title bar
+            this.Text = Application.ProductName + " version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             // display a default IP address 
             // TODO if important, use DNS to lookup
             gIP = new IPAddress(new byte[] {10,75,50,116});
@@ -994,26 +996,29 @@ namespace GaseraComms
                     //    else
                     //        MessageBox.Show("Unable to parse epoch time {0}", cState.measStr[i]);
                     //}
-                    // update display of current concentrations
-                    // can assume that the gasDt table is already sorted
-                    // by DateStamp (primary key) column
-                    // get the last row in the table
-                    DataRow dR = gasDt.Rows[gasDt.Rows.Count - 1];
-                    // first line is timestamp
-                    sB = new StringBuilder();
-                    DateTime tStamp = (DateTime)dR["DateStamp"];
-                    sB.AppendFormat("{0}\n\n", tStamp.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss", CultureInfo.InvariantCulture));
-                    // iterate thru each column in gas-order
-                    // and add to the currConcRichTextBox
-                    for (Gases gas = Gases.CH4; gas < Gases.Water_Offset; gas++)
+                    if (gasDt.Rows.Count > 0)
                     {
-                        sB.AppendFormat("{0}\t{1:G5}\n", gas.ToString(), (double) dR[gas.ToString()]);
+                        // update display of current concentrations
+                        // can assume that the gasDt table is already sorted
+                        // by DateStamp (primary key) column
+                        // get the last row in the table
+                        DataRow dR = gasDt.Rows[gasDt.Rows.Count - 1];
+                        // first line is timestamp
+                        sB = new StringBuilder();
+                        DateTime tStamp = (DateTime)dR["DateStamp"];
+                        sB.AppendFormat("{0}\n\n", tStamp.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss", CultureInfo.InvariantCulture));
+                        // iterate thru each column in gas-order
+                        // and add to the currConcRichTextBox
+                        for (Gases gas = Gases.CH4; gas < Gases.Water_Offset; gas++)
+                        {
+                            sB.AppendFormat("{0}\t{1:G5}\n", gas.ToString(), (double)dR[gas.ToString()]);
+                        }
+
+                        gasConcRichTextBox.Text = sB.ToString();
+
+                        // update the chart
+                        chart1.DataBind();
                     }
-
-                    gasConcRichTextBox.Text = sB.ToString();
-
-                    // update the chart
-                    chart1.DataBind();
 
                     // update the UI to show some action
                     measureProgressBar.PerformStep();
