@@ -30,6 +30,9 @@ namespace GaseraComms
         internal Dictionary<string, string> gaseraDStatus;
         // dict of Gasera measurement status (phase)
         internal Dictionary<string, string> gaseraMStatus;
+        // dict of Gasera errors
+        internal DataTable errorLog;
+        internal string errLogFileName;
        
 
         // time (ms) to wait in b/g task between communication cycles
@@ -67,16 +70,14 @@ namespace GaseraComms
             internal bool measuring;
             internal string Status;
             internal string[] DevErrors;
-            // dict of task number and task name
             internal Dictionary<string, string> TaskList;
             internal bool taskListUpdated;
             internal string[] respStr;
             internal string selectedTask;
             internal bool enableMeasure;
             internal bool haveErrors;
-            //internal string[] measStr;
             internal bool canOpenFile;
-            internal string fileName;
+            internal string LogFileName;
             internal bool fileAppend;
             internal string MeasPhase;
             internal bool starting;
@@ -93,9 +94,8 @@ namespace GaseraComms
                 selectedTask = string.Empty ;
                 enableMeasure = false;
                 haveErrors = false;
-                //measStr = new string[0];
                 canOpenFile = false;
-                fileName = string.Empty;
+                LogFileName = string.Empty;
                 fileAppend = true;
             }
         }
@@ -206,6 +206,7 @@ namespace GaseraComms
             ipTextBox.Text = gIP.ToString();
             // initialize the UI and cState
             initUI();
+            
             // build comms request strings
             foreach ( gaseraCmds cmd in Enum.GetValues( typeof (gaseraCmds)) )
             {
@@ -303,6 +304,7 @@ namespace GaseraComms
             gaseraErrors.Add("8026", "Blocker: Source is warming up");
             gaseraErrors.Add("8043", "Blocker: Laser temperature is too low");
             gaseraErrors.Add("8044", "Blocker: Laser temperature is too high");
+            gaseraErrors.Add("8101", "Critical: Sampling line has a blockade");
             gaseraErrors.Add("E001", "Critical: UART communications not working");
             gaseraErrors.Add("E002", "Critical: uDSP has been reset");
 
@@ -313,13 +315,59 @@ namespace GaseraComms
             gaseraMStatus.Add("2", "Sample integration");
             gaseraMStatus.Add("3", "Sample analysis");
 
+            // initialize error log table
+            errorLog = new DataTable("ErrorLog");
+            errorLog.Columns.Add("TimeStamp", typeof(DateTime));
+            errorLog.Columns.Add("ErrorCode", typeof(string));
+            errorLog.Columns.Add("ErrorString", typeof(string));
+            errorLog.Columns.Add("Active", typeof(bool));
+            errorLog.Columns.Add("EndTime", typeof(DateTime));
+
+            // keys are the error code && active flag
+            errorLog.PrimaryKey = new DataColumn[] { errorLog.Columns["ErrorCode"], errorLog.Columns["Active"] };
+
+            // connect error log datatable to errorDataGridView 
+            errorDataGridView.DataSource = errorLog;
+            errorDataGridView.Columns["TimeStamp"].HeaderText = "Start";
+            errorDataGridView.Columns["TimeStamp"].Width = 115;
+            errorDataGridView.Columns["TimeStamp"].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm:ss";
+            errorDataGridView.Columns["ErrorCode"].HeaderText = "Error";
+            errorDataGridView.Columns["ErrorCode"].Width = 35;
+            errorDataGridView.Columns["ErrorString"].HeaderText = "Description";
+            errorDataGridView.Columns["ErrorString"].Width = 300;
+            errorDataGridView.Columns["Active"].Width = 45;
+            errorDataGridView.Columns["EndTime"].HeaderText = "End";
+            errorDataGridView.Columns["EndTime"].Width = 115;
+            errorDataGridView.Columns["EndTime"].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm:ss";
+
+
+            ////test datagrid formatting
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    DataRow newRow = errorLog.NewRow();
+            //    newRow["TimeStamp"] = DateTime.Now;
+            //    newRow["ErrorCode"] = i.ToString();
+            //    newRow["ErrorString"] = "Error description goes here";
+            //    newRow["Active"] = true;
+            //    newRow["EndTime"] = DateTime.Now;
+            //    errorLog.Rows.Add(newRow);
+            //    Thread.Sleep(2000);
+            //}
+            //errorDataGridView.Sort(errorDataGridView.Columns["TimeStamp"], ListSortDirection.Descending);
+            //errorLog.AcceptChanges();
+
             // tab and other format settings for error display
-            errorRichTextBox.SelectionTabs = new int[] { 15 };
             gasConcRichTextBox.SelectionTabs = new int[] { 15 };
+
+            // set logFileName and 
+            // verify it can be opened and written to
+            DateTime startTime = DateTime.Now;
+            errLogFileName = Path.Combine(Application.LocalUserAppDataPath, "GaseraComms-" + startTime.ToString("yyyy-MM-dd-HHmmss") + ".log");
+            tryWriteLogFile(errLogFileName, statusToString(DateTime.Now, new string[] { this.Text, "App Started"}), false);
 
         }
         /// <summary>
-        /// Copy chart image to clipboard as png
+        /// On menu click, copy chart image to clipboard as png
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -557,13 +605,14 @@ namespace GaseraComms
                         // Device Error command
                         SendReceive(clientSocket, reqCmds[(int)gaseraCmds.AERR], out cState.respStr);
                         cState.haveErrors = false;
+                        cState.DevErrors = new string[0];
                         // error response is like this:
                         // AERR 0 <error code>
                         // where <error code> = "8001" for example
                         if (cState.respStr.Length > 2)
                         {
-                            cState.DevErrors = new string[cState.respStr.Length - 2];
                             cState.haveErrors = true;
+                            cState.DevErrors = new string[cState.respStr.Length - 2];
                             for (int i = 2; i < cState.respStr.Length; i++)
                             {
                                 cState.DevErrors[i - 2] = cState.respStr[i];
@@ -695,7 +744,7 @@ namespace GaseraComms
                                             gasDt.Rows.Add(dR);
                                             gasDt.AcceptChanges();
                                             // write to log file if enabled
-                                            if (cState.fileName.Length > 0 && cState.canOpenFile)
+                                            if (cState.LogFileName.Length > 0 && cState.canOpenFile)
                                             {
                                                 // iterate thru the new row, which keeps the order of the gases in line
                                                 // with the concentrations
@@ -711,7 +760,7 @@ namespace GaseraComms
                                                     logStr.AppendFormat("\t{0}", (double)dR[k]);
                                                 }
                                                 logStr.Append("\n");
-                                                writeLogFile(cState.fileName, logStr.ToString());
+                                                writeLogFile(cState.LogFileName, logStr.ToString());
                                             }
                                         }
                                     }
@@ -827,8 +876,9 @@ namespace GaseraComms
         {
             string statusValue = string.Empty;
             string errText = "None";
-            string errStr = "None";
+            StringBuilder errSb = new StringBuilder();
             string gasConc = string.Empty;
+            DataRow dR, aDr;
             StringBuilder sB = new StringBuilder();
             if (cState.commsUp)
             {
@@ -837,22 +887,68 @@ namespace GaseraComms
                 IPEndPoint ipEp = (IPEndPoint)cState.eP;
                 commStatusToolStripLabel.Text = (string.Format("Connected to {0}:{1}", IPAddress.Parse (ipEp.Address.ToString()), ipEp.Port));
 
-                // update the toolstrip error and errorRichTextBox contents
+                DateTime rightNow = DateTime.Now;
+                DateTime backThen = DateTime.Now;
+                // get the time of the most recent error log entry
+                // for comparison to new errors
+                if (errorLog.Rows.Count > 0)
+                {
+                    // the data rows are ordered by the time added
+                    // last row is most recent one
+                    backThen = (DateTime)errorLog.Rows[ errorLog.Rows.Count - 1 ]["TimeStamp"];
+                }
+
+                // display / log the errors
+
+                // deactivate active log rows 
+                // that have no-longer-active errors
+                for(int i = 0; i < errorLog.Rows.Count; i++)
+                {
+                    aDr = errorLog.Rows[i];
+                    if ((bool) aDr["Active"] && !cState.DevErrors.Contains((string) aDr["ErrorCode"]))
+                    {
+                        aDr["Active"] = false;
+                        aDr["EndTime"] = rightNow;
+                        
+                        // make a logfile entry for the closure
+                        tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)aDr["ErrorCode"], (string)aDr["ErrorString"], "Ended" } ));
+                    }
+                }
+
+                // update active errors, if any
                 if (cState.haveErrors)
                 {
-                    errStr = "Error";
-                    // display the error codes and strings in richTextBox
+                    // add rows for active errors not already active
                     foreach (string errCode in cState.DevErrors)
                     {
                         if (gaseraErrors.TryGetValue(errCode, out errText))
                         {
+                            if (!errorLog.Rows.Contains(new object[] { errCode, true }))
+                            {
+                                // then add it to the log as active
+                                dR = errorLog.NewRow();
+                                dR["TimeStamp"] = rightNow;
+                                dR["ErrorCode"] = errCode ;
+                                dR["ErrorString"] = errText;
+                                dR["Active"] = true;
+                                errorLog.Rows.Add(dR);
+                                // make a logfile entry for the new error
+                                tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)dR["ErrorCode"], (string)dR["ErrorString"], "Started" }));
+                            }
+                            // also add active errors to error text for display
                             sB.AppendFormat("{0}\t{1}\n", errCode, errText);
+                            errSb.AppendFormat("{0}, ", errCode);
                         }
                     }
-                    errText = sB.ToString();
+
+                        
                 }
-                deviceErrorToolStipStatusLabel.Text = (string.Format("Device Errors: {0}", errStr));
-                errorRichTextBox.Text = errText;
+                errorLog.AcceptChanges();
+                // sort the datagridview by timestamp
+                errorDataGridView.Sort(errorDataGridView.Columns["TimeStamp"], ListSortDirection.Descending);
+
+                // format error text display on toolstrip
+                deviceErrorToolStipStatusLabel.Text = (string.Format("Device Errors: {0}", errSb.ToString()));
 
                 // update the device status displayed
                 if (! gaseraDStatus.TryGetValue( cState.Status, out statusValue ))
@@ -946,7 +1042,7 @@ namespace GaseraComms
                         // can assume that the gasDt table is already sorted
                         // by DateStamp (primary key) column
                         // get the last row in the table
-                        DataRow dR = gasDt.Rows[gasDt.Rows.Count - 1];
+                        dR = gasDt.Rows[gasDt.Rows.Count - 1];
                         // first line is timestamp
                         sB = new StringBuilder();
                         DateTime tStamp = (DateTime)dR["DateStamp"];
@@ -995,6 +1091,22 @@ namespace GaseraComms
             //    // other?
             //}
             startStopCommsButton.Enabled = true;
+        }
+        /// <summary>
+        /// Create a logfile string from error data
+        /// </summary>
+        /// <param name="aDr"></param>
+        /// <returns></returns>
+        private string statusToString(DateTime dT, string[] dataStr)
+        {
+            StringBuilder sB = new StringBuilder();
+            sB.AppendFormat("{0}", dT.ToString("yyyy-MM-dd-HHmmss"));
+            foreach(string sT in dataStr)
+            {
+                sB.AppendFormat("\t{0}", sT);
+            }
+            sB.Append("\n");
+            return sB.ToString();
         }
 
         private void commsBGWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1096,29 +1208,29 @@ namespace GaseraComms
                     // TODO If there are already records in the gasDT, 
                     // see if they exist in the file (by DateStamp value)
                     // If not, ask user and maybe write them 
-                    cState.fileName = mDlg.FileName;
+                    cState.LogFileName = mDlg.FileName;
                     try
                     {
                         if (!cState.fileAppend)
                             // open the file and write a header
-                            initLogFile(cState.fileName);
+                            initLogFile(cState.LogFileName);
                         else
                         {
                             // if the file exists can it be opened?
-                            if (File.Exists(cState.fileName))
-                                writeLogFile(cState.fileName, string.Empty);
+                            if (File.Exists(cState.LogFileName))
+                                writeLogFile(cState.LogFileName, string.Empty);
                             else
                             {
                                 // if the file doen's exist,
                                 // open the file and write a header
-                                initLogFile(cState.fileName);
+                                initLogFile(cState.LogFileName);
                             }
                         }
                         cState.canOpenFile = true;
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(string.Format("Error creating or opening log file: {0}. ", cState.fileName, ex.Message));
+                        MessageBox.Show(string.Format("Error creating or opening log file: {0}. ", cState.LogFileName, ex.Message));
                         cState.canOpenFile = false;
                     }
                     finally
@@ -1126,7 +1238,7 @@ namespace GaseraComms
                         if (cState.canOpenFile)
                         {
                             tsB.Text = "Close File";
-                            fileNameToolStripStatusLabel.Text = cState.fileName ;
+                            fileNameToolStripStatusLabel.Text = cState.LogFileName ;
                         }
                         else
                         {
@@ -1137,6 +1249,21 @@ namespace GaseraComms
                     }
                 }
             }
+        }
+
+        static bool tryWriteLogFile (string fileName, string strToWrite, bool append = true)
+        {
+            bool result = false;
+            try
+            {
+                writeLogFile(fileName, strToWrite, append);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Error opening or writing log file {0}, {1}", fileName, ex.Message));
+            }
+            return result;
         }
         /// <summary>
         /// Append the passed string to the file, waiting for

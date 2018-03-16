@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.deviceStatusToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -39,6 +39,10 @@
             this.commStatusToolStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.measureProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.gasConcRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.errorDataGridView = new System.Windows.Forms.DataGridView();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.overWriteRadioButton = new System.Windows.Forms.RadioButton();
@@ -56,27 +60,24 @@
             this.stopMeasurementButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitButton = new System.Windows.Forms.ToolStripButton();
-            this.commsBGWorker = new System.ComponentModel.BackgroundWorker();
-            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.errorRichTextBox = new System.Windows.Forms.RichTextBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.fileNameToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.gasConcRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.commsBGWorker = new System.ComponentModel.BackgroundWorker();
+            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.statusStrip1.SuspendLayout();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
-            this.groupBox2.SuspendLayout();
             this.statusStrip2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -151,19 +152,64 @@
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.statusStrip2);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.gasConcRichTextBox);
+            this.groupBox3.Location = new System.Drawing.Point(21, 178);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(209, 222);
+            this.groupBox3.TabIndex = 9;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Current Gas Concentrations";
+            // 
+            // gasConcRichTextBox
+            // 
+            this.gasConcRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gasConcRichTextBox.Location = new System.Drawing.Point(3, 16);
+            this.gasConcRichTextBox.Name = "gasConcRichTextBox";
+            this.gasConcRichTextBox.ReadOnly = true;
+            this.gasConcRichTextBox.Size = new System.Drawing.Size(203, 203);
+            this.gasConcRichTextBox.TabIndex = 7;
+            this.gasConcRichTextBox.TabStop = false;
+            this.gasConcRichTextBox.Text = "";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.errorDataGridView);
+            this.groupBox2.Location = new System.Drawing.Point(249, 17);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(545, 122);
+            this.groupBox2.TabIndex = 8;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Active Errors";
+            // 
+            // errorDataGridView
+            // 
+            this.errorDataGridView.AllowUserToAddRows = false;
+            this.errorDataGridView.AllowUserToDeleteRows = false;
+            this.errorDataGridView.CausesValidation = false;
+            this.errorDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.errorDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.errorDataGridView.Location = new System.Drawing.Point(3, 16);
+            this.errorDataGridView.Name = "errorDataGridView";
+            this.errorDataGridView.Size = new System.Drawing.Size(539, 103);
+            this.errorDataGridView.TabIndex = 8;
+            // 
             // chart1
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart1.Legends.Add(legend2);
+            this.chart1.BorderlineColor = System.Drawing.Color.Gray;
+            this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(249, 164);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
-            this.chart1.Size = new System.Drawing.Size(531, 292);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
+            this.chart1.Size = new System.Drawing.Size(545, 292);
             this.chart1.TabIndex = 6;
             this.chart1.Text = "chart1";
             // 
@@ -323,39 +369,6 @@
             this.quitButton.Text = "Quit Program";
             this.quitButton.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
-            // commsBGWorker
-            // 
-            this.commsBGWorker.WorkerReportsProgress = true;
-            this.commsBGWorker.WorkerSupportsCancellation = true;
-            this.commsBGWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.commsBGWorker_DoWork);
-            this.commsBGWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.commsBGWorker_ProgressChanged);
-            this.commsBGWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.commsBGWorker_RunWorkerCompleted);
-            // 
-            // errorProvider1
-            // 
-            this.errorProvider1.ContainerControl = this;
-            // 
-            // errorRichTextBox
-            // 
-            this.errorRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.errorRichTextBox.Location = new System.Drawing.Point(3, 16);
-            this.errorRichTextBox.Name = "errorRichTextBox";
-            this.errorRichTextBox.ReadOnly = true;
-            this.errorRichTextBox.Size = new System.Drawing.Size(494, 67);
-            this.errorRichTextBox.TabIndex = 7;
-            this.errorRichTextBox.TabStop = false;
-            this.errorRichTextBox.Text = "";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.errorRichTextBox);
-            this.groupBox2.Location = new System.Drawing.Point(249, 17);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(500, 86);
-            this.groupBox2.TabIndex = 8;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Active Errors";
-            // 
             // statusStrip2
             // 
             this.statusStrip2.Dock = System.Windows.Forms.DockStyle.None;
@@ -371,26 +384,17 @@
             this.fileNameToolStripStatusLabel.Name = "fileNameToolStripStatusLabel";
             this.fileNameToolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
             // 
-            // groupBox3
+            // commsBGWorker
             // 
-            this.groupBox3.Controls.Add(this.gasConcRichTextBox);
-            this.groupBox3.Location = new System.Drawing.Point(21, 178);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(209, 222);
-            this.groupBox3.TabIndex = 9;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Current Gas Concentrations";
+            this.commsBGWorker.WorkerReportsProgress = true;
+            this.commsBGWorker.WorkerSupportsCancellation = true;
+            this.commsBGWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.commsBGWorker_DoWork);
+            this.commsBGWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.commsBGWorker_ProgressChanged);
+            this.commsBGWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.commsBGWorker_RunWorkerCompleted);
             // 
-            // gasConcRichTextBox
+            // errorProvider1
             // 
-            this.gasConcRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gasConcRichTextBox.Location = new System.Drawing.Point(3, 16);
-            this.gasConcRichTextBox.Name = "gasConcRichTextBox";
-            this.gasConcRichTextBox.ReadOnly = true;
-            this.gasConcRichTextBox.Size = new System.Drawing.Size(203, 203);
-            this.gasConcRichTextBox.TabIndex = 7;
-            this.gasConcRichTextBox.TabStop = false;
-            this.gasConcRichTextBox.Text = "";
+            this.errorProvider1.ContainerControl = this;
             // 
             // Form1
             // 
@@ -413,16 +417,17 @@
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.errorDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
-            this.groupBox2.ResumeLayout(false);
             this.statusStrip2.ResumeLayout(false);
             this.statusStrip2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -454,11 +459,11 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.GroupBox groupBox2;
-        internal System.Windows.Forms.RichTextBox errorRichTextBox;
         private System.Windows.Forms.StatusStrip statusStrip2;
         private System.Windows.Forms.ToolStripStatusLabel fileNameToolStripStatusLabel;
         private System.Windows.Forms.GroupBox groupBox3;
         internal System.Windows.Forms.RichTextBox gasConcRichTextBox;
+        private System.Windows.Forms.DataGridView errorDataGridView;
     }
 }
 
