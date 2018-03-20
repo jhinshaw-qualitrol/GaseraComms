@@ -28,13 +28,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_32B95688723B9C47140A481FFAC44968"
+        "OwnerKey" = "8:_4D2704A1C2424D18864722CFBC762DC1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4D2704A1C2424D18864722CFBC762DC1"
+        "OwnerKey" = "8:_32B95688723B9C47140A481FFAC44968"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -62,6 +62,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
         "Release"
@@ -86,6 +94,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
     }
@@ -123,6 +139,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
                 "ScatterAssemblies"
                 {
+                    "_32B95688723B9C47140A481FFAC44968"
+                    {
+                    "Name" = "8:System.Net.Http.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:System.Net.Http.dll"
             "TargetName" = "8:"
@@ -152,7 +173,7 @@
             {
             "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:TARGETDIR"
@@ -210,7 +231,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:GaseraComms"
         "ProductCode" = "8:{7A262F83-D27D-4586-90AF-89850932B5D7}"
-        "PackageCode" = "8:{4018B67E-25F0-44CD-BCE1-A737A2E8D673}"
+        "PackageCode" = "8:{A6D859A2-9186-45AF-B290-953EF0471143}"
         "UpgradeCode" = "8:{6F75C781-DF85-4A88-923D-4412F12F4377}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -218,7 +239,7 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Qualitrol"
+        "Manufacturer" = "8:Serveron"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:GaseraCommsSetup"
@@ -330,6 +351,34 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_15672D6F799A4DEEB54B0825C563878D"
+            {
+            "Name" = "8:Gasera Comms"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_4D2704A1C2424D18864722CFBC762DC1"
+            "Folder" = "8:_B48FB069122A4B218C4D9436D4643055"
+            "WorkingFolder" = "8:_4238ED42234B4E6F97EA7B7380F28384"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_3775BE1EE22949709ECA91C91C76AF43"
+            {
+            "Name" = "8:Gasera Comms"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_4D2704A1C2424D18864722CFBC762DC1"
+            "Folder" = "8:_381FB2A795634742A60B515B3590E545"
+            "WorkingFolder" = "8:_381FB2A795634742A60B515B3590E545"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
@@ -790,7 +839,7 @@
             "SourcePath" = "8:..\\GaseraComms\\obj\\Debug\\GaseraComms.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
-            "Folder" = "8:_381FB2A795634742A60B515B3590E545"
+            "Folder" = "8:_4238ED42234B4E6F97EA7B7380F28384"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"

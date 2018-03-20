@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define ERRLOGGING
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,7 +14,6 @@ using System.Threading;
 using System.IO;
 using System.Globalization;
 using System.Windows.Forms.DataVisualization.Charting;
-
 namespace GaseraComms
 {
     public partial class Form1 : Form
@@ -114,7 +114,16 @@ namespace GaseraComms
         /// Same values and order as found in RogueProc
         /// </summary>
         public enum Gases : int
-        { UNK = 0, CH4, C2H2, C2H4, C2H6, CO, CO2, H2O, Water_Offset, Zero, O2, H2, N2, C3H8, C3H6 }
+        {
+            UNK = 0,
+            CH4,
+            C2H2,
+            C2H4,
+            C2H6,
+            CO,
+            CO2,
+            H2O,
+            Water_Offset, Zero, O2, H2, N2, C3H8, C3H6 }
         /// <summary>
         /// Enumeration of CAS registry strings
         /// to control iteration of gasDict 
@@ -323,8 +332,8 @@ namespace GaseraComms
             errorLog.Columns.Add("Active", typeof(bool));
             errorLog.Columns.Add("EndTime", typeof(DateTime));
 
-            // keys are the error code && active flag
-            errorLog.PrimaryKey = new DataColumn[] { errorLog.Columns["ErrorCode"], errorLog.Columns["Active"] };
+            // set primary key
+            errorLog.PrimaryKey = new DataColumn[] { errorLog.Columns["TimeStamp"] };
 
             // connect error log datatable to errorDataGridView 
             errorDataGridView.DataSource = errorLog;
@@ -876,10 +885,11 @@ namespace GaseraComms
         {
             string statusValue = string.Empty;
             string errText = "None";
-            StringBuilder errSb = new StringBuilder();
+            StringBuilder errSb = new StringBuilder(errText);
             string gasConc = string.Empty;
             DataRow dR, aDr;
             StringBuilder sB = new StringBuilder();
+            bool errActive = false;
             if (cState.commsUp)
             {
                 startStopCommsButton.Text = "Stop Communications";
@@ -887,6 +897,7 @@ namespace GaseraComms
                 IPEndPoint ipEp = (IPEndPoint)cState.eP;
                 commStatusToolStripLabel.Text = (string.Format("Connected to {0}:{1}", IPAddress.Parse (ipEp.Address.ToString()), ipEp.Port));
 
+#if ERRLOGGING                
                 DateTime rightNow = DateTime.Now;
                 DateTime backThen = DateTime.Now;
                 // get the time of the most recent error log entry
@@ -900,8 +911,9 @@ namespace GaseraComms
 
                 // display / log the errors
 
-                // deactivate active log rows 
-                // that have no-longer-active errors
+                // deactivate currently active log rows 
+                // that have errors which are no longer active 
+                // on the Gasera
                 for(int i = 0; i < errorLog.Rows.Count; i++)
                 {
                     aDr = errorLog.Rows[i];
@@ -915,27 +927,40 @@ namespace GaseraComms
                     }
                 }
 
-                // update active errors, if any
+                // add active errors, if any
                 if (cState.haveErrors)
                 {
-                    // add rows for active errors not already active
+                    // add rows for errors active on the Gasera
+                    // but not currently active in the errLog datatable
+                    // clear the displayed errors stringbuilder
+                    errSb.Clear();
                     foreach (string errCode in cState.DevErrors)
                     {
                         if (gaseraErrors.TryGetValue(errCode, out errText))
                         {
-                            if (!errorLog.Rows.Contains(new object[] { errCode, true }))
+                            errActive = false;
+                            for (int i = 0; i < errorLog.Rows.Count; i++)
                             {
-                                // then add it to the log as active
-                                dR = errorLog.NewRow();
-                                dR["TimeStamp"] = rightNow;
-                                dR["ErrorCode"] = errCode ;
-                                dR["ErrorString"] = errText;
-                                dR["Active"] = true;
-                                errorLog.Rows.Add(dR);
-                                // make a logfile entry for the new error
-                                tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)dR["ErrorCode"], (string)dR["ErrorString"], "Started" }));
+                                aDr = errorLog.Rows[i];
+                                if ((string)aDr["ErrorCode"] == errCode && (bool)aDr["Active"])
+                                {
+                                    errActive = true;
+                                    break;
+                                }
                             }
-                            // also add active errors to error text for display
+                            if (!errActive )
+                            { 
+                                    // add it to the errorLog table as active
+                                    dR = errorLog.NewRow();
+                                    dR["TimeStamp"] = rightNow;
+                                    dR["ErrorCode"] = errCode ;
+                                    dR["ErrorString"] = errText;
+                                    dR["Active"] = true;
+                                    errorLog.Rows.Add(dR);
+                                    // make a logfile entry for the new error
+                                    tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)dR["ErrorCode"], (string)dR["ErrorString"], "Started" }));
+                            }
+                            // also place active errors in error text for display
                             sB.AppendFormat("{0}\t{1}\n", errCode, errText);
                             errSb.AppendFormat("{0}, ", errCode);
                         }
@@ -946,10 +971,12 @@ namespace GaseraComms
                 errorLog.AcceptChanges();
                 // sort the datagridview by timestamp
                 errorDataGridView.Sort(errorDataGridView.Columns["TimeStamp"], ListSortDirection.Descending);
-
+                // scroll the view to the top (if there's something to scroll)
+                if (errorDataGridView.FirstDisplayedScrollingRowIndex > 0)
+                errorDataGridView.FirstDisplayedScrollingRowIndex = 0;
                 // format error text display on toolstrip
                 deviceErrorToolStipStatusLabel.Text = (string.Format("Device Errors: {0}", errSb.ToString()));
-
+#endif
                 // update the device status displayed
                 if (! gaseraDStatus.TryGetValue( cState.Status, out statusValue ))
                     MessageBox.Show (string.Format("Invalid device status value received: {0}", cState.Status));
