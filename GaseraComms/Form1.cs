@@ -679,8 +679,10 @@ namespace GaseraComms
                         }
 
                         // control measurements,
+                        // changed to allow measurement even if have errors
                         
-                        if (!cState.haveErrors && cState.enableMeasure)
+                        //if (!cState.haveErrors && cState.enableMeasure)
+                        if (cState.enableMeasure)
                         {
                             if (cState.measuring)
                             {
@@ -936,37 +938,37 @@ namespace GaseraComms
                     errSb.Clear();
                     foreach (string errCode in cState.DevErrors)
                     {
-                        if (gaseraErrors.TryGetValue(errCode, out errText))
+                        // get the associated error text or unknown
+                        if (!gaseraErrors.TryGetValue(errCode, out errText))
                         {
-                            errActive = false;
-                            for (int i = 0; i < errorLog.Rows.Count; i++)
-                            {
-                                aDr = errorLog.Rows[i];
-                                if ((string)aDr["ErrorCode"] == errCode && (bool)aDr["Active"])
-                                {
-                                    errActive = true;
-                                    break;
-                                }
-                            }
-                            if (!errActive )
-                            { 
-                                    // add it to the errorLog table as active
-                                    dR = errorLog.NewRow();
-                                    dR["TimeStamp"] = rightNow;
-                                    dR["ErrorCode"] = errCode ;
-                                    dR["ErrorString"] = errText;
-                                    dR["Active"] = true;
-                                    errorLog.Rows.Add(dR);
-                                    // make a logfile entry for the new error
-                                    tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)dR["ErrorCode"], (string)dR["ErrorString"], "Started" }));
-                            }
-                            // also place active errors in error text for display
-                            sB.AppendFormat("{0}\t{1}\n", errCode, errText);
-                            errSb.AppendFormat("{0}, ", errCode);
+                            errText = "Unknown Error";
                         }
+                        errActive = false;
+                        for (int i = 0; i < errorLog.Rows.Count; i++)
+                        {
+                            aDr = errorLog.Rows[i];
+                            if ((string)aDr["ErrorCode"] == errCode && (bool)aDr["Active"])
+                            {
+                                errActive = true;
+                                break;
+                            }
+                        }
+                        if (!errActive )
+                        { 
+                                // add it to the errorLog table as active
+                                dR = errorLog.NewRow();
+                                dR["TimeStamp"] = rightNow;
+                                dR["ErrorCode"] = errCode ;
+                                dR["ErrorString"] = errText;
+                                dR["Active"] = true;
+                                errorLog.Rows.Add(dR);
+                                // make a logfile entry for the new error
+                                tryWriteLogFile(errLogFileName, statusToString(rightNow, new string[] { (string)dR["ErrorCode"], (string)dR["ErrorString"], "Started" }));
+                        }
+                        // also place active errors in error text for display
+                        sB.AppendFormat("{0}\t{1}\n", errCode, errText);
+                        errSb.AppendFormat("{0}, ", errCode);
                     }
-
-                        
                 }
                 errorLog.AcceptChanges();
                 // sort the datagridview by timestamp
